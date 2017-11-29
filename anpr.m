@@ -1,4 +1,8 @@
-I = imread('images/image_003.jpg');
+clear;
+close all;
+clc;
+
+I = imread('test_images/image_007.jpg');
 % figure, imshow(I);
 
 Igray = rgb2gray(I);
@@ -64,7 +68,7 @@ end
 % figure, plot(horz);
 
 % Filter out Horizontal Histogram Values by applying Dynamic Threshold
-disp('Filter out Horizontal Histogram...');
+% disp('Filter out Horizontal Histogram...');
 for i = 1:cols
 	if(horz(i) < average)
         horz(i) = 0;
@@ -81,7 +85,7 @@ difference = 0;
 total_sum = 0;
 difference = uint32(difference);
 
-disp('Processing Edges Vertically...');
+% disp('Processing Edges Vertically...');
 maximum = 0;
 max_vert = 0;
 for i = 2:rows
@@ -125,7 +129,7 @@ end
 % figure, plot(vert);
 
 % Filter out Vertical Histogram Values by applying Dynamic Threshold
-disp('Filter out Vertical Histogram...');
+% disp('Filter out Vertical Histogram...');
 for i = 1:rows
 	if(vert(i) < average)
         vert(i) = 0;
@@ -186,25 +190,37 @@ for i = 1:2:row_size
                 end
             end
         else
-            a = column(j)
-            b = column(j+1)
-            c = row(i)
-            d = row(i+1)
+            a = column(j);
+            b = column(j+1);
+            c = row(i);
+            d = row(i+1);
         end
     end
 end
 
-figure, imshow(I);
+% figure, imshow(I);
 
 asdf = I(c:d, a:b);
-figure, imshow(asdf);
+asdf(abs(asdf) < 150) =  0;
+
+% figure, imshow(asdf);
 
 [L Ne]=bwlabel(asdf);
 
 q=edge(asdf,'sobel');
+% q = q+asdf;
+% figure, imshow(q);
+
+f = fspecial('average', 2);
+q = imfilter(q, f);
+% q = medfilt2(q, [2 2]);
+figure, imshow(q);
+q=imfill(q, 'holes');
+figure, imshow(q);
 
 % Measure properties of image regions
 propied=regionprops(q,'BoundingBox');
+% rectangle('Position',propied(49).BoundingBox,'EdgeColor','g','LineWidth',2)
 % Plot Bounding Box
 % for n=1:size(propied,1)
 %     rectangle('Position',propied(n).BoundingBox,'EdgeColor','g','LineWidth',2)
@@ -212,28 +228,23 @@ propied=regionprops(q,'BoundingBox');
 
 qwer = struct2cell(propied);
 [n m] = size(propied);
-% for i=1:n
-%     if qwer{i}(2) < 200
-%         qwer{i} = [];
-%     end
-% end
+numberPlate = '';
+for i=1:n
+    if qwer{i}(4) > qwer{i}(3) & qwer{i}(4) >= 30 & qwer{i}(3) >= 5
+        rectangle('Position',propied(i).BoundingBox,'EdgeColor','g','LineWidth',2)
+        a = qwer{i}(1);
+        b = qwer{i}(2);
+        c = qwer{i}(3);
+        d = qwer{i}(4);
+        if qwer{i}(3) < 10
+            a = qwer{i}(1) - 10;
+            c = qwer{i}(3) + 20;
+        end
+        e = imcrop(q, [a b c d]);
+%         figure, imshow(e);
+        result = identify_character(e);
+        numberPlate = strcat(numberPlate, result);
+    end
+end
 
-% qwer = cell2struct(qwer);
-% for n=1:size(qwer,1)
-%     if isempty(qwer{n})
-%         display('yo')
-%     else
-%         qwer{n}
-%         rectangle('Position',qwer{n},'EdgeColor','g','LineWidth',2)
-%     end
-% end
-
-
-% Objects extraction
-% figure
-% for n=1:Ne
-%     [r,c] = find(L==n);
-%     n1=asdf(min(r):max(r),min(c):max(c));
-%     imshow(~n1);
-% %     pause(0.5)
-% end
+disp(numberPlate);
