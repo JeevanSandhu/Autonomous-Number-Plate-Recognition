@@ -1,88 +1,94 @@
-function letter=identify_character(snap)
-load NewTemplates
-snap=imresize(snap,[42 24]);
-comp=[ ];
-for n=1:length(NewTemplates)
-    sem=corr2(NewTemplates{1,n},snap);
+function letter=identify_character(image)
+load char_templates
+
+image = imresize(image,[42 24]);
+comp = [];
+
+for n=1:length(char_templates)
+    sem=corr2(char_templates{1,n},image);
     comp=[comp sem];
 end
-vd=find(comp==max(comp));
-if vd==1 || vd==2
+
+val = find(comp==max(comp));
+
+if val==1 || val==2
     letter='A';
-elseif vd==3 || vd==4
+elseif val==3 || val==4
     letter='B';
-elseif vd==5
+elseif val==5
     letter='C';
-elseif vd==6 || vd==7
+elseif val==6 || val==7
     letter='D';
-elseif vd==8
+elseif val==8
     letter='E';
-elseif vd==9
+elseif val==9
     letter='F';
-elseif vd==10
+elseif val==10
     letter='G';
-elseif vd==11
+elseif val==11
     letter='H';
-elseif vd==12
+elseif val==12
     letter='I';
-elseif vd==13
+elseif val==13
     letter='J';
-elseif vd==14
+elseif val==14
     letter='K';
-elseif vd==15
+elseif val==15
     letter='L';
-elseif vd==16
+elseif val==16
     letter='M';
-elseif vd==17
+elseif val==17
     letter='N';
-elseif vd==18 || vd==19
+elseif val==18 || val==19
     letter='O';
-elseif vd==20 || vd==21
+elseif val==20 || val==21
     letter='P';
-elseif vd==22 || vd==23
+elseif val==22 || val==23
     letter='Q';
-elseif vd==24 || vd==25
+elseif val==24 || val==25
     letter='R';
-elseif vd==26
+elseif val==26
     letter='S';
-elseif vd==27
+elseif val==27
     letter='T';
-elseif vd==28
+elseif val==28
     letter='U';
-elseif vd==29
+elseif val==29
     letter='V';
-elseif vd==30
+elseif val==30
     letter='W';
-elseif vd==31
+elseif val==31
     letter='X';
-elseif vd==32
+elseif val==32
     letter='Y';
-elseif vd==33
+elseif val==33
     letter='Z';
-    
-elseif vd==34
+elseif val==34
     letter='1';
-elseif vd==35
+elseif val==35
     letter='2';
-elseif vd==36
+elseif val==36
     letter='3';
-elseif vd==37 || vd==38
+elseif val==37 || val==38
     letter='4';
-elseif vd==39
+elseif val==39
     letter='5';
-elseif vd==40 || vd==41 || vd==42
+elseif val==40 || val==41 || val==42
     letter='6';
-elseif vd==43
+elseif val==43
     letter='7';
-elseif vd==44 || vd==45
+elseif val==44 || val==45
     letter='8';
-elseif vd==46 || vd==47 || vd==48
+elseif val==46 || val==47 || val==48
     letter='9';
-elseif vd==49 || vd==50
+elseif val==49 || val==50
     letter='0';
-elseif vd==51
+elseif val==51
     letter='I';
-elseif vd==52
+elseif val==52
     letter='7';
+elseif val==53
+    letter='D';
 end
+
 end

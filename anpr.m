@@ -1,11 +1,14 @@
-clear;
-close all;
 clc;
+clear;
+clear all;
+close all;
 
-I = imread('test_images/image_007.jpg');
+I = imread('test_images/image_004.jpg');
+% title('Original Image');
 % figure, imshow(I);
 
 Igray = rgb2gray(I);
+% title('Grayscale Image');
 % figure, imshow(Igray);
 
 [rows cols] = size(Igray);
@@ -16,6 +19,7 @@ for i=1:rows
         Idilate(i,j) = max(temp, Igray(i, j+1));
     end
 end
+% title('Dilated Image');
 % figure, imshow(Idilate);
 
 I = Idilate;
@@ -25,6 +29,7 @@ sum = 0;
 total_sum = 0;
 difference = uint32(difference);
 
+%% Process edges in horizontal direction
 max_horz = 0;
 maximum = 0;
 for i = 2:cols
@@ -52,9 +57,12 @@ for i = 2:cols
 end
 average = total_sum / cols;
 
+% title('Horizontal Edge Processing Histogram');
+% xlabel('Column Number ->');
+% ylabel('Difference _>');
 % figure, plot(horz1);
 
-
+%% Smoothen the Horizontal Histogram by applying Low Pass Filter
 sum = 0;
 horz = horz1;
 for i = 21:(cols-21)
@@ -65,10 +73,12 @@ for i = 21:(cols-21)
 	horz(i) = sum / 41;
 end
 
+% title('Histogram after passing through Low Pass Filter');
+% xlabel('Column Number ->');
+% ylabel('Difference ->');
 % figure, plot(horz);
 
-% Filter out Horizontal Histogram Values by applying Dynamic Threshold
-% disp('Filter out Horizontal Histogram...');
+%% Filter out Horizontal Histogram Values by applying Dynamic Threshold
 for i = 1:cols
 	if(horz(i) < average)
         horz(i) = 0;
@@ -78,19 +88,21 @@ for i = 1:cols
 	end
 end
 
+% title('Histogram after Filtering');
+% xlabel('Column Number ->');
+% ylabel('Difference ->');
 % figure, plot(horz);
 
-% PROCESS EDGES IN VERTICAL DIRECTION
+%% PROCESS EDGES IN VERTICAL DIRECTION
 difference = 0;
 total_sum = 0;
 difference = uint32(difference);
 
-% disp('Processing Edges Vertically...');
 maximum = 0;
 max_vert = 0;
 for i = 2:rows
 	sum = 0; 
-	for j = 2:cols %cols
+	for j = 2:cols
         if(I(i, j) > I(i, j-1))
             difference = uint32(I(i, j) - I(i, j-1));
         end
@@ -104,7 +116,7 @@ for i = 2:rows
     end
 	vert1(i) = sum;
 
-    %% Find Peak in Vertical Histogram
+    % Find Peak in Vertical Histogram
 	if(sum > maximum)
         max_vert = i;
         maximum = sum;
@@ -113,8 +125,12 @@ for i = 2:rows
 end
 average = total_sum / rows;
 
+% title('Vertical Edge Processing Histogram');
+% xlabel('Row Number ->');
+% ylabel('Difference ->');
 % figure, plot(vert1);
 
+%% Smoothen the Vertical Histogram by applying Low Pass Filter
 sum = 0;
 vert = vert1;
 
@@ -126,10 +142,12 @@ for i = 21:(rows-21)
 	vert(i) = sum / 41;
 end
 
+% title('Histogram after passing through Low Pass Filter');
+% xlabel('Row Number ->');
+% ylabel('Difference ->');
 % figure, plot(vert);
 
-% Filter out Vertical Histogram Values by applying Dynamic Threshold
-% disp('Filter out Vertical Histogram...');
+%% Filter out Vertical Histogram Values by applying Dynamic Threshold
 for i = 1:rows
 	if(vert(i) < average)
         vert(i) = 0;
@@ -139,10 +157,13 @@ for i = 1:rows
 	end
 end 
 
+% title('Histogram after Filtering');
+% xlabel('Row Number ->');
+% ylabel('Difference ->');
 % figure, plot(vert);
 
 
-% Find Probable candidates for Number Plate
+%% Find Probable candidates for Number Plate
 j = 1;
 for i = 2:cols-2
 	if(horz(i) ~= 0 && horz(i-1) == 0 && horz(i+1) == 0)
@@ -177,7 +198,7 @@ if(mod(row_size, 2))
 	row(row_size+1) = rows;
 end 
 
-% Region of Interest Extraction
+%% Region of Interest Extraction
 % Check each probable candidate
 for i = 1:2:row_size
 	for j = 1:2:column_size
@@ -198,39 +219,68 @@ for i = 1:2:row_size
     end
 end
 
+% title('Extracted Number Plate');
 % figure, imshow(I);
 
-asdf = I(c:d, a:b);
-asdf(abs(asdf) < 150) =  0;
+extractedPlate = I(c:d, a:b);
+extractedPlate(abs(extractedPlate) < 150) = 0;
 
-% figure, imshow(asdf);
-
-[L Ne]=bwlabel(asdf);
-
-q=edge(asdf,'sobel');
-% q = q+asdf;
+% g=medfilt2(asdf,[3 3]);
+% % figure, imshow(g);
+% se=strel('disk',1);
+% gi=imdilate(g,se);
+% % figure, imshow(gi);
+% ge=imerode(g,se);
+% % figure, imshow(ge);
+% gdiff=imsubtract(gi,ge);
+% % figure, imshow(gdiff);
+% gdiff=mat2gray(gdiff);
+% % figure, imshow(gdiff);
+% gdiff=conv2(gdiff,[1 1;1 1]);
+% % figure, imshow(gdiff);
+% gdiff=imadjust(gdiff,[0.8 0.9],[0 1],0.1);
+% figure, imshow(gdiff);
+% B=logical(gdiff);
+% % figure, imshow(B);
+% er=imerode(B,strel('line',25,0));
+% % figure, imshow(er);
+% out1=imsubtract(B,er);
+% % figure, imshow(out1);
+% F=imfill(out1,'holes');
+% % figure, imshow(F);
+% H=bwmorph(F,'thin',1);
+% % figure, imshow(H);
+% H=imerode(H,strel('line',3,10));
+% % figure, imshow(H);
+% q=bwareaopen(H,100);
 % figure, imshow(q);
 
+f = fspecial('laplacian');
+q = imfilter(extractedPlate, f);
+figure, imshow(q);
+q = extractedPlate - q;
+figure, imshow(q);
 f = fspecial('average', 2);
 q = imfilter(q, f);
-% q = medfilt2(q, [2 2]);
 figure, imshow(q);
-q=imfill(q, 'holes');
+q = edge(q, 'sobel');
 figure, imshow(q);
+w=imerode(q, strel('line',20,0));
+figure, imshow(w);
+q = q-w;
+figure, imshow(q);
+q = imfill(q, 'holes');
+figure, imshow(q);
+q = logical(q);
 
 % Measure properties of image regions
 propied=regionprops(q,'BoundingBox');
-% rectangle('Position',propied(49).BoundingBox,'EdgeColor','g','LineWidth',2)
-% Plot Bounding Box
-% for n=1:size(propied,1)
-%     rectangle('Position',propied(n).BoundingBox,'EdgeColor','g','LineWidth',2)
-% end
 
 qwer = struct2cell(propied);
 [n m] = size(propied);
 numberPlate = '';
 for i=1:n
-    if qwer{i}(4) > qwer{i}(3) & qwer{i}(4) >= 30 & qwer{i}(3) >= 5
+    if qwer{i}(4) > qwer{i}(3) & qwer{i}(4) >= 25 & qwer{i}(3) >= 5 & qwer{i}(3) < 25
         rectangle('Position',propied(i).BoundingBox,'EdgeColor','g','LineWidth',2)
         a = qwer{i}(1);
         b = qwer{i}(2);
